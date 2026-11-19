@@ -7,43 +7,55 @@ const Withdraw = () => {
   const [recent, setHistory] = useState<string[]>(() =>
     JSON.parse(localStorage.getItem("history") || "[]"),
   );
+  function styling(
+    style: CSSStyleDeclaration,
+    scale: number,
+    color: string,
+  ): void {
+    style.transform = `scale(${scale})`;
+    style.border = `2px solid ${color}`;
+  }
   const [amount, setAmount] = useState(0);
-  const [pin, setPin] = useState(0);
+  const [pin, setPin] = useState<number>();
   const [message, setMessage] = useState("");
   const handleAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isNaN(Number(e.target.value))) {
-      e.target.style.transform = "scale(1.05)";
-      e.target.style.border = "2px solid red";
+      styling(e.target.style, 1.05, "red");
     } else {
-      e.target.style.transform = "scale(1)";
-      e.target.style.border = "2px solid blue";
+      styling(e.target.style, 1, "blue");
       setAmount(Number(e.target.value));
     }
   };
   const handlePin = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isNaN(Number(e.target.value))) {
-      e.target.style.transform = "scale(1.05)";
-      e.target.style.border = "2px solid red";
+      styling(e.target.style, 1.05, "red");
+      return
     } else {
-      e.target.style.transform = "scale(1)";
-      e.target.style.border = "2px solid blue";
+      styling(e.target.style, 1, "blue");
       setPin(Number(e.target.value));
     }
   };
   const withdraw = () => {
-    if (amount < 100) {
+    if (pin === undefined) {
+      setMessage("Pin is empty");
+    } else if (amount < 100) {
       setMessage("Enter a number above 100");
-    } else if (pin < 1000) {
+    } else if (pin < 1000 || pin > 9999) {
       setMessage("Enter a 4 digit pin");
     } else if (amount > balance) {
       setMessage(`Insufficient funds`);
-    } else if (amount >= 100 && amount <= balance && pin >= 1000 && pin <= 9999) {
+    } else if (
+      amount >= 100 &&
+      amount <= balance &&
+      pin >= 1000 &&
+      pin <= 9999
+    ) {
       setMessage(`Withdrawal of N${amount} is succesful`);
       const newBalance = balance - amount;
       const activity: string[] = [...recent, `You withdrawed N${amount}`];
       setAmount(0);
       setPin(0);
-      setBalance(newBalance)
+      setBalance(newBalance);
       localStorage.setItem("history", JSON.stringify(activity));
       localStorage.setItem("balance", JSON.stringify(newBalance));
       setHistory(activity);
